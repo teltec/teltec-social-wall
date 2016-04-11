@@ -4,7 +4,7 @@ A web application that shows live tweets that contain a specified hashtag.
 
 ## How it works?
 
-It uses a [Node-Red][1] flow that connects with [Twitter][2] to retrieve live tweets filteres by the specified hashtags, then sends the results via [WebSocket][3] to the frontend application.
+It uses a [Node-Red][1] flow which connects with [Twitter][2] using supplied credentials to retrieve tweets in real-time filtered by the specified hashtags, then sends each tweet via [WebSocket][3] to the frontend application to present them.
 
 ## Screenshot
 
