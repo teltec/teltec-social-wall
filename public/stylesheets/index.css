@@ -1,0 +1,32 @@
+h1.live-tweets-title {
+	font-size: 8.0vmin; /* Viewport relative length */
+	font-family: 'Alegreya Sans SC', sans-serif;
+	text-shadow: 4px 4px 4px #aaa;
+	color: rgb(0,82,156);
+	margin-left: -15px;
+	word-wrap: break-word;
+	letter-spacing: 0px;
+	font-weight: bold;
+}
+.config-panel {
+	display: none;
+}
+.tweet-template-custom,
+.tweet-template-native {
+	display: none;
+}
+.row-title {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+.tweet-item {
+	padding-right: 0px;
+}
+.tweet-container {
+}
+.property[data-item=score] {
+	display: none;
+}
+.property[data-item=message] {
+	word-wrap: break-word;
+}

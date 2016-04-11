@@ -1,0 +1,36 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    <!--[if IE]>
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    <![endif]-->
+
+    title= title
+
+    meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no')
+
+    meta(name='description', content='')
+    meta(name='author', content='Jardel Weyrich')
+
+    block head_styles
+      link(rel='stylesheet', type="text/css", href='3rd/bootstrap/bootstrap.min.css')
+      link(rel='stylesheet', type="text/css", href='stylesheets/layout.css')
+
+    block head_scripts
+
+  body(class='index-body')
+    div(class='container body-content')
+      block(class='messages_panel')
+        if messages
+          each msg in messages
+            p(class='bg-success')= msg
+      
+      block body_content
+    
+    block foot_scripts
+      script(type='text/javascript', src='3rd/jquery/jquery.min.js')
+      script(type='text/javascript', src='3rd/bootstrap/bootstrap.min.js')
+      script(type='text/javascript', src='3rd/underscore/underscore-min.js')
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "teltec-live-tweets",
+  "version": "1.0.0",
+  "private": false,
+  "license": "MIT",
+  "repository": "https://github.com/teltec/teltec-live-tweets.git",
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.13.2",
+    "cookie-parser": "~1.3.5",
+    "debug": "~2.2.0",
+    "express": "^4.13.4",
+    "jade": "~1.11.0",
+    "moment": "^2.12.0",
+    "morgan": "~1.6.1",
+    "serve-favicon": "~2.3.0"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-watch": "^1.0.0"
+  }
+}
