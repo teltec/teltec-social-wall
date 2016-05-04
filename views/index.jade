@@ -194,7 +194,7 @@ append foot_scripts
         // Close the socket, just in case.
         _socket.close();
         // Reconnect!
-        setTimeout(connect_to_live_tweets(), _config['websocket_retry_connection_interval']);
+        setTimeout(connect_to_live_tweets, _config['websocket_retry_connection_interval']);
       };
 
       // Show a connected message when the WebSocket is opened.
@@ -210,7 +210,7 @@ append foot_scripts
         //console.log('Message: ' + message);
         try {
           var obj = JSON.parse(message);
-          received_tweet(obj);  
+          received_tweet(obj);
         } catch (e) {
           console.error('Failed to parse tweet: ' + e.message);
         }
@@ -222,7 +222,7 @@ append foot_scripts
         console.log(message);
         //socketStatus.className = 'closed';
         // Reconnect!
-        setTimeout(connect_to_live_tweets(), _config['websocket_retry_connection_interval']);
+        setTimeout(connect_to_live_tweets, _config['websocket_retry_connection_interval']);
       };
 
       var animate_insertion_fading = function ($element) {
