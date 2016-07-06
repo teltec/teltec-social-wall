@@ -45,6 +45,12 @@
 							],
 							dest: 'public/3rd/jquery/',
 						},
+						{
+							flatten: true,
+							expand: true,
+							src: ['bower_components/underscore/underscore-min.*'],
+							dest: 'public/3rd/underscore/',
+						},
 					],
 				},
 			}
