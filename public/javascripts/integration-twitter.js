@@ -1,7 +1,9 @@
-window.twttr = (function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0],
-    t = window.twttr || {};
-  if (d.getElementById(id)) return t;
+'use strict';
+
+window.twttr = (function (d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0], t = window.twttr || {};
+  if (d.getElementById(id))
+    return t;
   js = d.createElement(s);
   js.id = id;
   js.src = "https://platform.twitter.com/widgets.js";
@@ -15,9 +17,41 @@ window.twttr = (function(d, s, id) {
   return t;
 }(document, "script", "twitter-wjs"));
 
+var BadwordsFilter = function () {
+  this._badwords_regex = [];
+
+  // Pre-build a RegExp object for each badword in order to
+  // avoid creating it for every test.
+  this.build_badwords_filters = function () {
+    var complete_list = global_badwords.concat([
+      'DILMA',
+      'CUNHA',
+      'PSDB',
+    ]);
+
+    for (var i = 0; i < complete_list.length; i++) {
+      this._badwords_regex.push(new RegExp(complete_list[i], 'ig'));
+    }
+  };
+
+  this.contains_badword = function (tweet_text) {
+    for (var i = 0; i < this._badwords_regex.length; i++) {
+      var unaccented = removeDiacritics(tweet_text);
+      var re = this._badwords_regex[i];
+      //console.log('re = ' + re + ', unaccented = ' + unaccented);
+      var result = unaccented.match(re);
+      if (result) {
+        //console.log('Matched: ' + result);
+        return true;
+      }
+    }
+    return false;
+  };
+};
+
 $(document).ready(function() {
   var _config = {
-    'max_visible_tweets': 2,
+    'max_visible_items': 6,
     'update_interval': 5000, // In milliseconds
     'websocket_retry_connection_interval': 5000, // In milliseconds
   };
@@ -25,6 +59,8 @@ $(document).ready(function() {
   var _state = {
     'updating': true,
   };
+
+  var badwordsFilter = new BadwordsFilter();
 
   $('.config-form').on('submit', function (event) {
     event.preventDefault();
@@ -44,7 +80,7 @@ $(document).ready(function() {
         } else {
           $button.text("{% trans 'Stop' %}");
           _state['updating'] = true;
-          setTimeout(track_and_update_visible_tweets, _config['update_interval']);
+          setTimeout(track_and_update_visible_items, _config['update_interval']);
         }
         break;
     }
@@ -94,8 +130,8 @@ $(document).ready(function() {
 
   var _endpoint = 'ws://live-tweets.mybluemix.net/ws/tweets/teltec';
   var _socket;
-  var _visible_tweets = [];
-  var _queued_tweets = [];
+  var _visible_items = [];
+  var _queued_items = [];
 
   var connect_to_live_tweets = function () {
     _socket = new WebSocket(_endpoint);
@@ -143,80 +179,12 @@ $(document).ready(function() {
     setTimeout(connect_to_live_tweets, _config['websocket_retry_connection_interval']);
   };
 
-  var animate_insertion_fading = function ($element) {
-    $element.animate(
-      { opacity: 1.0 },
-      {
-        duration: 1000,
-        complete: function() {
-          // Complete.
-          console.log('Added 1 - fading.');
-        }
-      }
-    );
-  };
-
-  var animate_insertion_width = function ($element, final_width) {
-    $element.animate(
-      { width: final_width },
-      {
-        duration: 1000,
-        complete: function() {
-          // Complete.
-          console.log('Added 1 - width='+final_width);
-        }
-      }
-    );
-  };
-
-  var animate_removal_width = function ($element, is_inserting_new) {
-    var $new_tweet_item = is_inserting_new ? clone_tweet_template() : null;
-    // TODO(jweyrich): Figure out why we need the +30 here.
-    var original_width = $element.width() + 30;
-    //console.log('original_width=' + original_width);
-    $element.animate(
-      { width:'toggle' },
-      {
-        duration: 500,
-        complete: function() {
-          console.log('Removed 1.');
-          $(this).remove();
-          if (is_inserting_new) {
-            var $last_tweet_item = $(".tweets-row > .tweet-item:last");
-            $new_tweet_item.width(0);
-            $new_tweet_item.insertAfter($last_tweet_item);
-            animate_insertion_width($new_tweet_item, original_width);
-          }
-        }
-      }
-    );
-    return is_inserting_new ? $new_tweet_item : null;
-  };
-
   var clone_tweet_template = function () {
-    var $cloned_element = $('.tweets-row > .tweet-template-native > .tweet-item').clone();
-    $cloned_element.find('blockquote')
-      .removeClass('twitter-tweet-DUMMY').addClass('twitter-tweet');
+    var $cloned_element = $('.social-templates .tweet-template-native .tweet-item').clone();
     return $cloned_element;
   };
 
-  var track_and_update_tweet_timestamps = function () {
-    setTimeout(track_and_update_tweet_timestamps, 1000);
-
-    $(".tweets-panel").find('.tweets-row > .tweet-item').each(function (i, elem) {
-      var $when = $(elem).find('.when');
-      var timestamp = $when.attr('data-timestamp');
-      update_tweet_timestamp($when, timestamp);
-    });
-  };
-
-  var update_tweet_timestamp = function ($element, timestamp) {
-    // Example of obj.tweet.created_at: "Thu Apr 07 14:18:36 +0000 2016"
-    var displayDate = moment(new Date(timestamp)).fromNow();
-    $element.text(displayDate);
-  };
-
-  var set_tweet_data_native = function ($element, obj) {
+  var build_tweet_widget_native = function ($element, obj, on_complete) {
     twttr.widgets.createTweet(
       obj.tweet.id_str,
       $element[0],
@@ -225,124 +193,73 @@ $(document).ready(function() {
       }
     ).then(function (el) {
       //console.log("Tweet has been displayed.");
+      if (typeof on_complete === 'function')
+        on_complete();
     });
   };
 
-  var set_tweet_data_custom = function ($element, obj) {
-    if (obj.tweet.user.screen_name) {
-      var $author = $element.find('.author');
-      $author.text(obj.tweet.user.screen_name);
-    }
-    if (obj.tweet.text) {
-      var $message = $element.find('.message');
-      $message.text(obj.tweet.text);
-    }
-    if (obj.tweet.created_at) {
-      var $when = $element.find('.when');
-      $when.attr('data-timestamp', obj.tweet.created_at);
-      update_tweet_timestamp($when, obj.tweet.created_at);
-    }
-    if (obj.sentiment) {
-      var $score = $element.find('.score');
-      $score.text(obj.sentiment.score);
-      //$score.text('TESTING');
-      $score.css('display', 'block');
-    }
-  };
-
-  var set_tweet_data = function ($element, obj) {
-    set_tweet_data_native($element, obj);
-    //set_tweet_data_custom($element, obj);
-  };
-
-  var contains_badword = function (tweet_text) {
-    for (var i = 0; i < _badwords_regex.length; i++) {
-      var unaccented = removeDiacritics(tweet_text);
-      var re = _badwords_regex[i];
-      //console.log('re = ' + re + ', unaccented = ' + unaccented);
-      var result = unaccented.match(re);
-      if (result) {
-        //console.log('Matched: ' + result);
-        return true;
-      }
-    }
-    return false;
+  var build_tweet_widget = function ($element, obj, on_complete) {
+    build_tweet_widget_native($element, obj, on_complete);
+    $element.attr('data-timestamp', obj.tweet.timestamp_ms);
   };
 
   var received_tweet = function (tweet_obj) {
     var tweet_text = tweet_obj.tweet.text;
-    if (contains_badword(tweet_text)) {
+    if (badwordsFilter.contains_badword(tweet_text)) {
       console.log('Discaring tweet from @' + tweet_obj.tweet.user.screen_name + ' due to badwords: ' + tweet_text);
       return;
     }
 
-    _queued_tweets.push(tweet_obj);
-    console.log('Queued a new tweet: ' + _queued_tweets.length + ' queued');
+    _queued_items.push(tweet_obj);
+    console.log('Queued a new tweet: ' + _queued_items.length + ' queued');
   };
 
-  function track_and_update_visible_tweets() {
+  function track_and_update_visible_items() {
     if (!_state['updating'])
       return;
 
-    setTimeout(track_and_update_visible_tweets, _config['update_interval']);
+    // Re-schedule execution.
+    setTimeout(track_and_update_visible_items, _config['update_interval']);
 
-    if (_queued_tweets.length === 0)
+    if (_queued_items.length === 0)
       return;
 
-    var count = _visible_tweets.length;
-
-    console.log('Presenting a new tweet! Was showing exactly ' + count);
-
-    var new_tweet_obj = _queued_tweets.shift(); // Remove first element.
-
-    _visible_tweets.push(new_tweet_obj);
-
-    if (count < _config['max_visible_tweets']) {
-      var $last_tweet_item = $(".tweets-panel").find('.tweets-row > .tweet-item:last, .tweets-row > .tweet-template-native').last();
-
-      var $new_tweet_item = clone_tweet_template();
-      set_tweet_data($new_tweet_item, new_tweet_obj);
-      
-      $new_tweet_item.css('opacity', 0);
-      $new_tweet_item.insertAfter($last_tweet_item);
-      animate_insertion_fading($new_tweet_item);
-    } else {
-      var $tweet_to_remove = $(".tweets-row > .tweet-item:first");
-
-      var $new_tweet_item = animate_removal_width($tweet_to_remove, true);
-      set_tweet_data($new_tweet_item, new_tweet_obj);
-
-      _visible_tweets.shift(); // Remove first element.
-
-      var extra = _visible_tweets.length - _config['max_visible_tweets'];
-      //console.log('Removing ' + extra + ' extra tweets');
-      for (var i=0; i<extra; i++) {
-        $tweet_to_remove = $tweet_to_remove.next();
-        animate_removal_width($tweet_to_remove, false);
-        _visible_tweets.shift(); // Remove more elements.
-      }
+    // Remove some visible items if the count exceeds `max_visible_items`.
+    var extra = _visible_items.length - _config['max_visible_items'];
+    if (extra > 0)
+      console.log('Removing ' + extra + ' extra items');
+    for (var i=0; i<extra; i++) {
+      window.socialGrid.pop_front();
+      _visible_items.shift(); // Remove more elements.
     }
-  };
 
-  var _badwords_regex = [];
+    var count = _visible_items.length;
 
-  // Pre-build a RegExp object for each badword in order to
-  // avoid creating it for every test.
-  var build_badwords_filters = function () {
-    var complete_list = global_badwords.concat([
-      'DILMA',
-      'CUNHA',
-      'PSDB',
-    ]);
+    console.log('Presenting a new item! Was showing exactly ' + count);
 
-    for (var i = 0; i < complete_list.length; i++) {
-      _badwords_regex.push(new RegExp(complete_list[i], 'ig'));
+    var new_item_obj = _queued_items.shift(); // Remove first element.
+
+    _visible_items.push(new_item_obj);
+
+    // Check whether the item is from Twitter or Instagram
+    var $new_item_element = clone_tweet_template();
+    build_tweet_widget($new_item_element, new_item_obj, function () { window.socialGrid.updateLayout(); } );
+
+    var is_full = count >= _config['max_visible_items'];
+
+    if (is_full) {
+      _visible_items.shift(); // Remove first element.
+
+      window.socialGrid.pop_front(function () {
+        window.socialGrid.push_back($new_item_element);
+      });
+    } else {
+      window.socialGrid.push_back($new_item_element);
     }
   };
   
   populate_config_form();
-  track_and_update_visible_tweets();
-  track_and_update_tweet_timestamps();
+  track_and_update_visible_items();
   connect_to_live_tweets();
-  build_badwords_filters();
+  badwordsFilter.build_badwords_filters();
 });

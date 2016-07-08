@@ -25,11 +25,11 @@ append body_content
   .config-panel
     form.config-form
       .form-group
-        label(for='max_visible_tweets') title (string)
-        input#max_visible_tweets.form-control.config(type='text', data-item='title', data-type='str', value='#{title}', autocomplete='off')
+        label(for='title') title (string)
+        input#title.form-control.config(type='text', data-item='title', data-type='str', value='#{title}', autocomplete='off')
       .form-group
-        label(for='max_visible_tweets') max_visible_tweets (int)
-        input#max_visible_tweets.form-control.config(type='text', data-item='max_visible_tweets', data-type='int', autocomplete='off')
+        label(for='max_visible_items') max_visible_items (int)
+        input#max_visible_items.form-control.config(type='text', data-item='max_visible_items', data-type='int', autocomplete='off')
       .form-group
         label(for='update_interval') update_interval (int, in milliseconds)
         input#update_interval.form-control.config(type='text', data-item='update_interval', data-type='int', autocomplete='off')
@@ -37,51 +37,30 @@ append body_content
       button.btn.btn-default(type='submit', name='stop') {% trans 'Stop' %}
 
   .index-body-content
-    .tweets-panel
-      .row.tweets-row
-        .tweet-template-native
-          .col-md-5.tweet-item
-            .tweet-container.tweet
-              // Twitter widget
-        .tweet-template-custom
-          .col-md-5.tweet-item
-            .tweet-container.tweet
-              .property
-                | @
-                span.author(data-item='author') #{author}
-                |  {% trans 'said' %}:
-              .property(data-item='message')
-                span.message #{message}
-              .property(data-item='when')
-                | When: 
-                span.when #{when}
-              .property(data-item='score')
-                | Score: 
-                span.score #{score}
-
-//        .col-md-5.tweet-item
-//          .tweet-container.tweet
-//            .property
-//              | @
-//              span.author(data-item='author') #{author[i]}
-//              |  {% trans 'said' %}:
-//            .property(data-item='message')
-//              span.message #{message}
-//            .property(data-item='when')
-//              | When: 
-//              span.when #{when}
-//            .property(data-item='score')
-//              | Score: 
-//              span.score #{score}
+    div.social-templates
+      .tweet-template-native
+        .tweet-item
+          // Twitter widget
+    div(id='social-grid')
+      
 
 append foot_scripts
   script(type='text/javascript', src="3rd/moment/moment-with-locales.min.js")
   script(type='text/javascript', src="javascripts/diacritics.js")
   script(type='text/javascript', src="javascripts/badwords.pt-br.js")
+  script(type='text/javascript', src='//vestride.github.io/Shuffle/dist/shuffle.js')
+  script(type='text/javascript', src='javascripts/dynamic-grid.js')
   script.
     $(document).ready(function() {
       var locale = 'pt-BR';
       moment.locale(locale);
       console.log('moment.locale = ' + moment.locale());
+      
+      window.socialGrid = new DynamicGrid(document.getElementById('social-grid'));
+
+      //var getTweetTimestamp = function (element) {
+      //  return parseInt(element.getAttribute('data-timestamp'), 10);
+      //};
+      //window.socialGrid.sortBy(getTweetTimestamp, false);
     });
-  script(type='text/javascript', src="javascripts/integration-twitter.js")
+  script(type='text/javascript', src='javascripts/integration-twitter.js')
