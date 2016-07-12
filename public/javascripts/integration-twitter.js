@@ -17,13 +17,13 @@ window.twttr = (function (d, s, id) {
   return t;
 }(document, "script", "twitter-wjs"));
 
-var BadwordsFilter = function () {
+var BadwordsFilter = function (array_of_badwords) {
   this._badwords_regex = [];
 
   // Pre-build a RegExp object for each badword in order to
   // avoid creating it for every test.
   this.build_badwords_filters = function () {
-    var complete_list = global_badwords.concat([
+    var complete_list = array_of_badwords.concat([
       'DILMA',
       'CUNHA',
       'PSDB',
@@ -49,18 +49,93 @@ var BadwordsFilter = function () {
   };
 };
 
-$(document).ready(function() {
+var TwitterReceiver = function (config, endpoint) {
+  this.config = config;
+  this.on_tweet = null; // Callback prototype `function (tweet_obj)`
+
+  this.start = function () {
+    this._socket = new WebSocket(this._endpoint);
+
+    this._socket.onerror = this._socket_on_error;
+    this._socket.onopen = this._socket_on_open;
+    this._socket.onmessage = this._socket_on_message;
+    this._socket.onclose = this._socket_on_close;
+  };
+
+  this.stop = function () {
+    if (this._socket == null)
+      return;
+
+    // Close the socket.
+    this._socket.close();
+    this._socket = null;
+  };
+
+  // Internal
+  this._config = config;
+  this._endpoint = endpoint;
+  this._socket = null;
+
+
+  var self = this;
+
+  // Handle any errors that occur.
+  this._socket_on_error = function (error) {
+    var message = 'WebSocket error: ' + error;
+    console.error(message);
+    self.stop();
+    
+    // Reconnect?
+    if (self._config['reconnect_on_error'])
+      setTimeout(self.start, self._config['retry_connection_interval']);
+  };
+
+  // Show a connected message when the WebSocket is opened.
+  this._socket_on_open = function (event) {
+    var message = 'Connected to: ' + self._endpoint;
+    console.log(message);
+    //socketStatus.className = 'open';
+  };
+
+  // Handle messages sent by the server.
+  this._socket_on_message = function (event) {
+    var message = event.data;
+    //console.log('Message: ' + message);
+
+    var obj = null;
+    try {
+      obj = JSON.parse(message);
+    } catch (e) {
+      console.error('Failed to parse tweet: ' + e.message);
+    }
+
+    if (typeof self.on_tweet === 'function')
+      self.on_tweet(obj);
+  };
+
+  // Show a disconnected message when the WebSocket is closed.
+  this._socket_on_close = function (event) {
+    var message = 'WebSocket disconnected from ' + self._endpoint;
+    console.log(message);
+    //socketStatus.className = 'closed';
+  };
+};
+
+$(document).ready(function () {
+  //
+  // Config form
+  //
+
   var _config = {
     'max_visible_items': 6,
     'update_interval': 5000, // In milliseconds
-    'websocket_retry_connection_interval': 5000, // In milliseconds
+    'reconnect_on_error': true,
+    'retry_connection_interval': 5000, // In milliseconds
   };
 
   var _state = {
     'updating': true,
   };
-
-  var badwordsFilter = new BadwordsFilter();
 
   $('.config-form').on('submit', function (event) {
     event.preventDefault();
@@ -128,56 +203,17 @@ $(document).ready(function() {
     console.log('Saved config: ' + JSON.stringify(_config));
   };
 
-  var _endpoint = 'ws://live-tweets.mybluemix.net/ws/tweets/teltec';
-  var _socket;
-  var _visible_items = [];
-  var _queued_items = [];
+  //
+  // Badwords
+  //
 
-  var connect_to_live_tweets = function () {
-    _socket = new WebSocket(_endpoint);
-    _socket.onerror = _socket_onerror;
-    _socket.onopen = _socket_onopen;
-    _socket.onmessage = _socket_onmessage;
-    _socket.onclose = _socket_onclose;
-  };
+  var badwords_filter = new BadwordsFilter(global_badwords);
 
-  // Handle any errors that occur.
-  var _socket_onerror = function (error) {
-    var message = 'WebSocket error: ' + error;
-    console.error(message);
-    // Close the socket, just in case.
-    _socket.close();
-    // Reconnect!
-    setTimeout(connect_to_live_tweets, _config['websocket_retry_connection_interval']);
-  };
+  //
+  // Twitter
+  //
 
-  // Show a connected message when the WebSocket is opened.
-  var _socket_onopen = function (event) {
-    var message = 'Connected to: ' + _endpoint;
-    console.log(message);
-    //socketStatus.className = 'open';
-  };
-
-  // Handle messages sent by the server.
-  var _socket_onmessage = function (event) {
-    var message = event.data;
-    //console.log('Message: ' + message);
-    try {
-      var obj = JSON.parse(message);
-      received_tweet(obj);
-    } catch (e) {
-      console.error('Failed to parse tweet: ' + e.message);
-    }
-  };
-
-  // Show a disconnected message when the WebSocket is closed.
-  var _socket_onclose = function (event) {
-    var message = 'WebSocket disconnected from ' + _endpoint;
-    console.log(message);
-    //socketStatus.className = 'closed';
-    // Reconnect!
-    setTimeout(connect_to_live_tweets, _config['websocket_retry_connection_interval']);
-  };
+  var twitter_receiver = new TwitterReceiver(_config, 'ws://live-tweets.mybluemix.net/ws/tweets/teltec');
 
   var clone_tweet_template = function () {
     var $cloned_element = $('.social-templates .tweet-template-native .tweet-item').clone();
@@ -198,14 +234,9 @@ $(document).ready(function() {
     });
   };
 
-  var build_tweet_widget = function ($element, obj, on_complete) {
-    build_tweet_widget_native($element, obj, on_complete);
-    $element.attr('data-timestamp', obj.tweet.timestamp_ms);
-  };
-
-  var received_tweet = function (tweet_obj) {
+  twitter_receiver.on_tweet = function (tweet_obj) {
     var tweet_text = tweet_obj.tweet.text;
-    if (badwordsFilter.contains_badword(tweet_text)) {
+    if (badwords_filter.contains_badword(tweet_text)) {
       console.log('Discaring tweet from @' + tweet_obj.tweet.user.screen_name + ' due to badwords: ' + tweet_text);
       return;
     }
@@ -213,6 +244,18 @@ $(document).ready(function() {
     _queued_items.push(tweet_obj);
     console.log('Queued a new tweet: ' + _queued_items.length + ' queued');
   };
+
+  var build_tweet_widget = function ($element, obj, on_complete) {
+    build_tweet_widget_native($element, obj, on_complete);
+    $element.attr('data-timestamp', obj.tweet.timestamp_ms);
+  };
+
+  //
+  // Presentation
+  //
+
+  var _visible_items = [];
+  var _queued_items = [];
 
   function track_and_update_visible_items() {
     if (!_state['updating'])
@@ -260,6 +303,6 @@ $(document).ready(function() {
   
   populate_config_form();
   track_and_update_visible_items();
-  connect_to_live_tweets();
-  badwordsFilter.build_badwords_filters();
+  badwords_filter.build_badwords_filters();
+  twitter_receiver.start();
 });
