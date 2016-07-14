@@ -55,7 +55,7 @@ $(document).ready(function () {
   var on_config_property_update = function (property_name) {
     switch (property_name) {
       case 'title':
-        $('.live-tweets-title').text(_config['title']);
+        $('.social-wall-title').text(_config['title']);
         break;
     }
   };

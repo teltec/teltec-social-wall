@@ -10,12 +10,12 @@ Instagram: The backend uses the Instagram API to retrieve recent tagged media fi
 
 ## Screenshot
 
-![Screenshot](https://raw.githubusercontent.com/teltec/teltec-live-tweets/master/screencapture.png)
+![Screenshot](https://raw.githubusercontent.com/teltec/teltec-social-wall/master/screencapture.png)
 
 ## How to run?
 
-	git clone https://github.com/teltec/teltec-live-tweets.git
-	cd teltec-live-tweets
+	git clone https://github.com/teltec/teltec-social-wall.git
+	cd teltec-social-wall
 	npm install
 	bower install
 	grunt

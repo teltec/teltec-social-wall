@@ -31,7 +31,7 @@ var ws_broadcast = function (server, msg) {
 
 router.get('/', function (req, res, next) {
   res.render('index', {
-    title: 'Teltec Live Tweets!',
+    title: 'Teltec Social Wall',
     messages: [],
   });
 });
