@@ -11,14 +11,14 @@ append head_styles
   <!-- Font used for the title -->
   link(rel='stylesheet', type='text/css', href='https://fonts.googleapis.com/css?family=Alegreya Sans SC')
   
-  link(rel='stylesheet', type="text/css", href='stylesheets/index.css')
+  link(rel='stylesheet', type='text/css', href='stylesheets/index.css')
 
 append body_content
-  div(class="row row-title")
-    div(class="col-md-12")
-      div(class="col-md-3")
-        img(src="images/teltec-logo-alpha.png", onclick="$('.config-panel').show();")
-      div(class="col-md-8")
+  div(class='row row-title')
+    div(class='col-md-12')
+      div(class='col-md-3')
+        img(src='images/teltec-logo-alpha.png', onclick="$('.config-panel').show();")
+      div(class='col-md-8')
         h1.live-tweets-title
           | #{title}
 
@@ -33,21 +33,24 @@ append body_content
       .form-group
         label(for='update_interval') update_interval (int, in milliseconds)
         input#update_interval.form-control.config(type='text', data-item='update_interval', data-type='int', autocomplete='off')
-      button.btn.btn-default(type='submit', name='save') {% trans 'Save' %}
-      button.btn.btn-default(type='submit', name='stop') {% trans 'Stop' %}
+      button.btn.btn-default(type='submit', name='save') Save
+      button.btn.btn-default(type='submit', name='stop') Stop
 
   .index-body-content
     div.social-templates
       .tweet-template-native
         .tweet-item
           // Twitter widget
+      .instagram-template-native
+        .instagram-item
+          // Instagram widget
     div(id='social-grid')
       
 
 append foot_scripts
-  script(type='text/javascript', src="3rd/moment/moment-with-locales.min.js")
-  script(type='text/javascript', src="javascripts/diacritics.js")
-  script(type='text/javascript', src="javascripts/badwords.pt-br.js")
+  script(type='text/javascript', src='3rd/moment/moment-with-locales.min.js')
+  script(type='text/javascript', src='javascripts/diacritics.js')
+  script(type='text/javascript', src='javascripts/badwords.pt-br.js')
   script(type='text/javascript', src='//vestride.github.io/Shuffle/dist/shuffle.js')
   script(type='text/javascript', src='javascripts/dynamic-grid.js')
   script.
@@ -56,13 +59,15 @@ append foot_scripts
       moment.locale(locale);
       console.log('moment.locale = ' + moment.locale());
       
-      window.socialGrid = new DynamicGrid(document.getElementById('social-grid'));
+      window.social_grid = new DynamicGrid(document.getElementById('social-grid'));
 
       //var getTweetTimestamp = function (element) {
       //  return parseInt(element.getAttribute('data-timestamp'), 10);
       //};
-      //window.socialGrid.sortBy(getTweetTimestamp, false);
+      //window.social_grid.sort_by(getTweetTimestamp, false);
     });
   script(type='text/javascript', src='javascripts/badwords-filter.js')
+  script(type='text/javascript', src='javascripts/websocket-client.js')
   script(type='text/javascript', src='javascripts/twitter-receiver.js')
+  script(type='text/javascript', src='javascripts/instagram-receiver.js')
   script(type='text/javascript', src='javascripts/presentation.js')

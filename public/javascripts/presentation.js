@@ -9,6 +9,7 @@ $(document).ready(function () {
     'max_visible_items': 6,
     'update_interval': 5000, // In milliseconds
     'reconnect_on_error': true,
+    'reconnect_on_close': true,
     'retry_connection_interval': 5000, // In milliseconds
   };
 
@@ -29,10 +30,10 @@ $(document).ready(function () {
       case 'stop':
         var updating = _state['updating'];
         if (updating) {
-          $button.text("{% trans 'Start' %}");
+          $button.text('Start');
           _state['updating'] = false;
         } else {
-          $button.text("{% trans 'Stop' %}");
+          $button.text('Stop');
           _state['updating'] = true;
           setTimeout(track_and_update_visible_items, _config['update_interval']);
         }
@@ -94,6 +95,17 @@ $(document).ready(function () {
 
   var twitter_receiver = new TwitterReceiver(_config, 'ws://live-tweets.mybluemix.net/ws/tweets/teltec');
 
+  twitter_receiver.on_item = function (item_obj) {
+    var text = item_obj.tweet.text;
+    if (badwords_filter.contains_badword(text)) {
+      console.log('Discaring tweet from @' + item_obj.tweet.user.screen_name + ' due to badwords: ' + text);
+      return;
+    }
+
+    _queued_items.push({ 'from': 'twitter', 'object': item_obj });
+    console.log('Queued a new tweet: ' + _queued_items.length + ' queued');
+  };
+
   var clone_tweet_template = function () {
     var $cloned_element = $('.social-templates .tweet-template-native .tweet-item').clone();
     return $cloned_element;
@@ -107,26 +119,53 @@ $(document).ready(function () {
         align: 'left'
       }
     ).then(function (el) {
-      //console.log("Tweet has been displayed.");
+      //console.log('Tweet has been displayed.');
       if (typeof on_complete === 'function')
         on_complete();
     });
   };
 
-  twitter_receiver.on_tweet = function (tweet_obj) {
-    var tweet_text = tweet_obj.tweet.text;
-    if (badwords_filter.contains_badword(tweet_text)) {
-      console.log('Discaring tweet from @' + tweet_obj.tweet.user.screen_name + ' due to badwords: ' + tweet_text);
-      return;
-    }
-
-    _queued_items.push(tweet_obj);
-    console.log('Queued a new tweet: ' + _queued_items.length + ' queued');
-  };
-
   var build_tweet_widget = function ($element, obj, on_complete) {
     build_tweet_widget_native($element, obj, on_complete);
     $element.attr('data-timestamp', obj.tweet.timestamp_ms);
+  };
+
+  //
+  // Instagram
+  //
+
+  var instagram_receiver = new InstagramReceiver(_config, 'ws://' + window.location.hostname + ':8001/ws/instagram/teltec');
+
+  instagram_receiver.on_item = function (item_obj) {
+    var text = item_obj.caption.text;
+    if (badwords_filter.contains_badword(text)) {
+      console.log('Discaring insta from @' + item_obj.user.username + ' due to badwords: ' + text);
+      return;
+    }
+
+    _queued_items.push({ 'from': 'instagram', 'object': item_obj });
+    console.log('Queued a new insta: ' + _queued_items.length + ' queued');
+  };
+
+  var clone_instagram_template = function () {
+    var $cloned_element = $('.social-templates .instagram-template-native .instagram-item').clone();
+    return $cloned_element;
+  };
+
+  var build_instagram_widget_native = function ($element, obj, on_complete) {
+    var media_obj = obj['oembed'];
+    $element[0].style.width = '510px';
+    $element[0].innerHTML = media_obj.html;
+    $element[0].style.margin = '10px 10px 0px 0px';
+
+    //console.log('Insta has been displayed.');
+    if (typeof on_complete === 'function')
+      on_complete();
+  };
+
+  var build_instagram_widget = function ($element, obj, on_complete) {
+    build_instagram_widget_native($element, obj, on_complete);
+    $element.attr('data-timestamp', obj.created_time);
   };
 
   //
@@ -151,7 +190,7 @@ $(document).ready(function () {
     if (extra > 0)
       console.log('Removing ' + extra + ' extra items');
     for (var i=0; i<extra; i++) {
-      window.socialGrid.pop_front();
+      window.social_grid.pop_front();
       _visible_items.shift(); // Remove more elements.
     }
 
@@ -159,24 +198,39 @@ $(document).ready(function () {
 
     console.log('Presenting a new item! Was showing exactly ' + count);
 
-    var new_item_obj = _queued_items.shift(); // Remove first element.
-
+    var new_item = _queued_items.shift(); // Remove first element.
+    var new_item_from = new_item['from'];
+    var new_item_obj = new_item['object'];
+    
     _visible_items.push(new_item_obj);
 
-    // Check whether the item is from Twitter or Instagram
-    var $new_item_element = clone_tweet_template();
-    build_tweet_widget($new_item_element, new_item_obj, function () { window.socialGrid.updateLayout(); } );
+    var $new_item_element = null;
+
+    switch (new_item_from) {
+      default:
+        console.error('Unhandled item from ' + new_item_from);
+        return;
+      case 'twitter':
+        // Check whether the item is from Twitter or Instagram
+        $new_item_element = clone_tweet_template();
+        build_tweet_widget($new_item_element, new_item_obj, function () { window.social_grid.update_layout(); } );
+        break;
+      case 'instagram':
+        $new_item_element = clone_instagram_template();
+        build_instagram_widget($new_item_element, new_item_obj, function () { window.social_grid.update_layout(); } );
+        break;
+    }
 
     var is_full = count >= _config['max_visible_items'];
 
     if (is_full) {
       _visible_items.shift(); // Remove first element.
 
-      window.socialGrid.pop_front(function () {
-        window.socialGrid.push_back($new_item_element);
+      window.social_grid.pop_front(function () {
+        window.social_grid.push_back($new_item_element);
       });
     } else {
-      window.socialGrid.push_back($new_item_element);
+      window.social_grid.push_back($new_item_element);
     }
   };
   
@@ -184,4 +238,9 @@ $(document).ready(function () {
   track_and_update_visible_items();
   badwords_filter.build_badwords_filters();
   twitter_receiver.start();
+  window.social_grid.on_layout(function () {
+    if (window.instgrm)
+      window.instgrm.Embeds.process();
+  });
+  instagram_receiver.start();
 });
