@@ -1,14 +1,37 @@
+body {
+  font-size: 16px;
+  color: rgb(0,0,0);
+}
+
+h1 {
+  font-size: 26px;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+h3 {
+  font-size: 16px;
+}
+
+div.contact-info {
+  margin-top: 16px;
+}
+
+div.contact-info span {
+  display: block;
+}
+
+footer {
+  margin-top: 16px;
+}
+
 .index-body-content {
-	background-color: rgb(230,230,230);
+  background-color: rgb(230,230,230);
 }
 
-h1.privacy-title {
-	color: rgb(0,0,0);
-	font-weight: bold;
-	margin-bottom: 20px;
-}
-
-div.privacy-policy {
-	color: rgb(0,0,0);
-	padding: 20px;
+.privacy-policy {
+  padding: 20px;
 }

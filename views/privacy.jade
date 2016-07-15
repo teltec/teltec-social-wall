@@ -10,8 +10,110 @@ append body_content
         img(src='images/teltec-logo-alpha.png', onclick="$('.config-panel').show();")
 
   .index-body-content
-    h1.privacy-title
+    h1
       | #{title}
     div.privacy-policy
+      h2
+        | Collection and Use of Personal Information
       p
-        | Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eligendi non quis exercitationem culpa nesciunt nihil aut nostrum explicabo reprehenderit optio amet ab temporibus asperiores quasi cupiditate. Voluptatum ducimus voluptates voluptas?
+        | Personal information is any information that allows the direct identification and association to a single individual.
+      p
+        | We ask for some personal information for the use of our services. We and our affiliates may share this personal information among ourselves, and use them in accordance with this Privacy Policy. We can also aggregate them with other information in order to improve our products, services, content and advertising.
+      p
+        | Here are some examples of the types of personal information that we may collect and how we use them.
+
+      h3
+        | What personal information we collect:
+      ul
+        li
+          | When you post something (Tweet, Photo, Video, etc) that contains one of the hashtags we specify in your application, we display your post in some private or public screens (televisions, computer screens, etc) that are located in our corporate facilities or any events that Teltec Solutions might be hosting or participating as exhibitor.
+        li
+          | Periodically, we may use your personal information to send important messages or notifications, such as changes to our terms, conditions and policies.
+        li
+          | We may also use personal information for internal purposes such as audits, data analysis, and researches to improve our products and services.
+
+      h2
+        | Collection and Use of Non-Personal Information
+      p
+        | We also collect non-personal information -- data that do not allow direct identification and association to a single individual. We may collect, use, transfer, and publish non-personal information for any reason. Below are some examples of the types of non-personal information that we may collect as well as how we may use them:
+      ul
+        li
+          | We may collect information such as gender, language, location, time zone, and whether your Facebook or Instagram account is verified or not. This information helps us better understand how you use our services, products, and advertising, and how we can improve them.
+        li
+          | We may also collect information about the use of our application. This information is aggregated and used to help us provide more useful information to our clients and to understand what their interests are. Aggregated data is considered non-personal information for the purpose of this Privacy Policy.
+      p
+        | If we aggregate personal with non-personal information, the combined result will be treated as personal information for as long as they are kept aggregated.
+
+      h2
+        | Disclosure to third parties
+      p
+        | We may provide some personal information to strategic work partners who provide products and services or those who help us selling them to customers. Personal information will only be shared by us in order to provide or improve our products, services and advertising. They will not be shared with third parties for commercial purposes.
+
+      h2
+        | Service Providers
+      p
+        | We share personal information with companies who provide services such as customer service, assessment of interest in our products and services, and conduction of customer or satisfaction research. These companies are obligated to protect all personal information and may be present anywhere that Teltec Solutions operates.
+
+      h2
+        | Protection of Personal Information
+      p
+        | We take precautions, including administrative, technical and physical measures to protect your personal information against loss, theft, misuse, as well as from unauthorized access, disclosure, alteration and destruction.
+        | We use SSL (Secure Sockets Layer) encryption on all online services and web pages where personal information travels. In doing so, we protect the confidentiality of your information transmitted over the Internet.
+        | When you use any of our products, services or applications or publish content in a social networking service, the personal information you share is visible to other users and can be read, collected and used by them. You are responsible for the personal information you allow to be sent. For example, if you put your name and e-mail on a social network, this information will be public, depending on your privacy settings.
+
+      h2
+        | Integrity and Retention of Personal Information
+      p
+        | We help you keep your personal information accurate, complete and current. We will retain them for the period necessary to fulfill the purposes set forth in this Privacy Policy, unless a longer retention period is required or permitted by law. We will delete all your personal data if you send a formal request to our e-mail contact, except in cases where the law requires us to keep them.
+
+      h2
+        | Location-based services
+      p
+        | In order to provide location-based services in our products, we and our partners and licensees can obtain, use and share location data, including the geographic location of your device. This location data are obtained anonymously, so that it is not possible to identify you personally, and used to provide and improve our location-based products and services. For example, we may share geographic location data with our partners and licensees.
+
+      h2
+        | Third Party Sites and Services
+      p
+        | Our websites, products, applications and services may contain links to websites, products, and services from third parties. Our products and services may also use or offer third party products or services, for example, a third party application for Facebook or Instagram. The information obtained by third parties, that may include information from your Facebook or Instagram account, is governed by the privacy policy of such third parties. We recommend that you refer to their privacy practices for more information.
+
+      h2
+        | Our Company Commitment to Your Privacy
+      p
+        | To ensure that your personal information is secure, we communicate our privacy and security policies to our employees and strictly follow the precautionary measures regarding privacy within the company.
+
+      h2
+        | Questions about Privacy
+      p
+        | If you have any inquiry or questions regarding our Privacy Policy or data processing, please contact us through our email or phone.
+        | Teltec Solutions may update its Privacy Policy periodically. If we make any policy change in material terms, we will post a notice on our application, along with the updated Privacy Policy.
+      p
+        | Our policies are in accordance with the 
+        a(href="https://developers.facebook.com/policy#data", rel="external")
+          | data protection policy of Facebook
+        |  and with the
+        a(href="https://www.instagram.com/about/legal/privacy/", rel="external")
+          |  privacy policy of Instagram
+        | .
+
+    div.contact-info
+      div(itemscope="", itemtype="http://schema.org/Organization")
+        span(itemprop="name")
+          | Teltec Solutions Ltda
+        div(itemprop="address", itemscope="", itemtype="http://schema.org/PostalAddress")
+          span(itemprop="streetAddress")
+            | Rua Miguel Daux, 100
+          span(itemprop="addressLocality")
+            | Florianópolis, SC
+          span(itemprop="postalCode")
+            | 88080-220
+        span(itemprop="telephone")
+          | +55 (48) 3031-3450
+        a(href="mailto:contato@inham.com.br")
+          span(itemprop="email")
+            | teltec@teltecsolutions.com.br
+        div(itemprop="geo", itemscope="", itemtype="http://schema.org/GeoCoordinates")
+          meta(itemprop="latitude", content="-27.608817")
+          meta(itemprop="longitude", content="-48.578091")
+
+    footer
+      | Last Update: July 18, 2016
