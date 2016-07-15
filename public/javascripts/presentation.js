@@ -249,7 +249,6 @@ $(document).ready(function () {
   
   populate_config_form();
   track_and_update_visible_items();
-  badwords_filter.build_badwords_filters();
   twitter_receiver.start();
   window.social_grid.on_layout(function () {
     if (window.instgrm)
