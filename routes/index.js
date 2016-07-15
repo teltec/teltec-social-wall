@@ -1,26 +1,50 @@
 var express = require('express');
 var router = express.Router();
-var util = require('util');
-var ws = require('nodejs-websocket');
-var InstagramFacade = require('./instagram-facade.js');
+
+var hashtags = [
+  '#NodeJS',
+  '#Twitter',
+  '#Instagram',
+];
 
 //
 // WebSocket
 //
 
-var ws_server = ws.createServer(function (conn) {
-  console.log('WebSocket: New connection');
-  conn.on("text", function (str) {
-    console.log('WebSocket: Received ' + str);
-    conn.sendText(str.toUpperCase());
-  })
+var ws_clients = {
+  '/ws/twitter': [],
+  '/ws/instagram': [],
+};
+var websocket = require('nodejs-websocket');
+var ws_server = websocket.createServer(function (conn) {
+  console.log('websocket: New connection via ' + conn.path);
+  if (!ws_clients.hasOwnProperty(conn.path)) {
+    conn.sendText('ERROR: Unhandled path ' + conn.path);
+    return;
+  }
+
+  ws_clients[conn.path].push(conn);
+
   conn.on("close", function (code, reason) {
-    console.log("WebSocket: Connection closed");
-  })
+    console.log("websocket: Connection closed");
+    var pos = ws_clients[conn.path].indexOf(conn);
+    if (pos !== -1) {
+      ws_clients[conn.path].splice(pos, 1);
+    }
+  });
+
+  //conn.on("text", function (str) {
+  //  console.log('websocket: Received ' + str);
+  //});
 }).listen(8001);
 
-var ws_broadcast = function (server, msg) {
-  server.connections.forEach(function (conn) {
+var ws_broadcast = function (server, path, msg) {
+  if (!ws_clients.hasOwnProperty(path)) {
+    console.error('Invalid path for ws_clients: ' + path);
+    return;
+  }
+  //server.connections.forEach(function (conn) {
+  ws_clients[path].forEach(function (conn) {
     conn.sendText(msg);
   });
 };
@@ -44,25 +68,28 @@ router.get('/privacy', function (req, res, next) {
 });
 
 //
-// Instagram initialization
+// Twitter initialization
 //
 
-var insta_config = {
-  'client_id': process.env['IG_CLIENT_ID'],
-  'client_secret': process.env['IG_CLIENT_SECRET'],
-  'access_token': process.env['IG_ACCESS_TOKEN'],
-  'redirect_uri': util.format('http:\/\/%s/api/instagram/auth', process.env['DOMAIN']),
-};
-var insta = new InstagramFacade(router, insta_config);
+var TwitterClient = require('../lib/twitter-client.js');
+var twitter = new TwitterClient(router);
 setTimeout(function () {
-  insta.tag_media_recent('nature', function (media) {
-    ws_broadcast(ws_server, JSON.stringify(media));
+  twitter.stream_statuses(hashtags, function (tweet) {
+    ws_broadcast(ws_server, '/ws/twitter', JSON.stringify(tweet));
   });
 }, 5000);
 
-// insta.ig.user_media_recent({ count: 3 }, function (err, medias, pagination, remaining, limit) {
-//   console.log(err);
-// });
+//
+// Instagram initialization
+//
+
+var InstagramClient = require('../lib/instagram-client.js');
+var instagram = new InstagramClient(router);
+setTimeout(function () {
+  instagram.stream_medias(hashtags, function (media) {
+    ws_broadcast(ws_server, '/ws/instagram', JSON.stringify(media));
+  });
+}, 5000);
 
 //
 // Handle exit properly

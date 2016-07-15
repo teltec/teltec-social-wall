@@ -4,9 +4,9 @@ A web application that shows live Tweets and Instagram photos that contain a spe
 
 ## How it works?
 
-Twitter: A [Node-Red][1] flow connects with [Twitter][2] using supplied credentials to retrieve tweets in real-time filtered by the specified hashtags, then sends each tweet via [WebSocket][3] to the frontend application to present them.
+Twitter: The backend uses the Twitter API to receive live tweets filtered by the specified hashtags, then sends each tweet via [WebSocket][3] to the frontend application to present them.
 
-Instagram: The backend uses the Instagram API to retrieve recent tagged media filtered by the specified hashtags, then sends each media via [WebSocket][3] to the frontend application to present them.
+Instagram: The backend uses the Instagram API to retrieve recent tagged media filtered by the specified tags, then sends each media via [WebSocket][3] to the frontend application to present them.
 
 ## Screenshot
 
@@ -20,11 +20,6 @@ Instagram: The backend uses the Instagram API to retrieve recent tagged media fi
 	bower install
 	grunt
 	./bin/www
-
-## TODO
-
-- Promisify dependent events;
-
 
 [1]: http://nodered.org/
 [2]: http://www.twitter.com/

@@ -1,6 +1,7 @@
 'use strict';
 
 $(document).ready(function () {
+
   //
   // Config form
   //
@@ -11,6 +12,18 @@ $(document).ready(function () {
     'reconnect_on_error': true,
     'reconnect_on_close': true,
     'retry_connection_interval': 5000, // In milliseconds
+    'networks': {
+      'twitter': {
+        'websocket': {
+          'url': 'ws://' + window.location.hostname + ':8001/ws/twitter',
+        }
+      },
+      'instagram': {
+        'websocket': {
+          'url': 'ws://' + window.location.hostname + ':8001/ws/instagram',
+        }
+      },
+    }
   };
 
   var _state = {
@@ -93,12 +106,12 @@ $(document).ready(function () {
   // Twitter
   //
 
-  var twitter_receiver = new TwitterReceiver(_config, 'ws://live-tweets.mybluemix.net/ws/tweets/teltec');
+  var twitter_receiver = new TwitterReceiver(_config, _config.networks['twitter'].websocket.url);
 
   twitter_receiver.on_item = function (item_obj) {
-    var text = item_obj.tweet.text;
+    var text = item_obj.text;
     if (badwords_filter.contains_badword(text)) {
-      console.log('Discaring tweet from @' + item_obj.tweet.user.screen_name + ' due to badwords: ' + text);
+      console.log('Discaring tweet from @' + item_obj.user.screen_name + ' due to badwords: ' + text);
       return;
     }
 
@@ -113,7 +126,7 @@ $(document).ready(function () {
 
   var build_tweet_widget_native = function ($element, obj, on_complete) {
     twttr.widgets.createTweet(
-      obj.tweet.id_str,
+      obj.id_str,
       $element[0],
       {
         align: 'left'
@@ -127,14 +140,14 @@ $(document).ready(function () {
 
   var build_tweet_widget = function ($element, obj, on_complete) {
     build_tweet_widget_native($element, obj, on_complete);
-    $element.attr('data-timestamp', obj.tweet.timestamp_ms);
+    $element.attr('data-timestamp', obj.timestamp_ms);
   };
 
   //
   // Instagram
   //
 
-  var instagram_receiver = new InstagramReceiver(_config, 'ws://' + window.location.hostname + ':8001/ws/instagram/teltec');
+  var instagram_receiver = new InstagramReceiver(_config, _config.networks['instagram'].websocket.url);
 
   instagram_receiver.on_item = function (item_obj) {
     var text = item_obj.caption.text;
