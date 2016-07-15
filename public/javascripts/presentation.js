@@ -249,10 +249,10 @@ $(document).ready(function () {
   
   populate_config_form();
   track_and_update_visible_items();
-  twitter_receiver.start();
   window.social_grid.on_layout(function () {
     if (window.instgrm)
       window.instgrm.Embeds.process();
   });
+  twitter_receiver.start();
   instagram_receiver.start();
 });
