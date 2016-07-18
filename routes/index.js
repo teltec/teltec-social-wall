@@ -55,8 +55,9 @@ var ws_broadcast = function (server, path, msg) {
 
 router.get('/', function (req, res, next) {
   res.render('index', {
-    title: hashtags.join(' '),
+    title: 'Teltec Social Wall',
     messages: [],
+    hashtags: hashtags.join(' '),
   });
 });
 

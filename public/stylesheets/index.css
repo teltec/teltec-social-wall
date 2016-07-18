@@ -1,4 +1,4 @@
-h1.social-wall-title {
+h1.col-hashtags {
   font-size: 8.0vmin; /* Viewport relative length */
   font-family: 'Alegreya Sans SC', sans-serif;
   text-shadow: 4px 4px 4px #aaa;
@@ -21,8 +21,6 @@ h1.social-wall-title {
 }
 .tweet-item {
   padding-right: 0px;
-}
-.tweet-container {
 }
 .property[data-item=score] {
   display: none;

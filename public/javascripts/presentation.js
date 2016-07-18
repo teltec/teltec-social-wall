@@ -67,8 +67,8 @@ $(document).ready(function () {
 
   var on_config_property_update = function (property_name) {
     switch (property_name) {
-      case 'title':
-        $('.social-wall-title').text(_config['title']);
+      case 'hashtags':
+        $('.col-hashtags').text(_config['hashtags']);
         break;
     }
   };
