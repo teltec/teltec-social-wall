@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const fs = require('fs');
 
 var hashtags = [
   '#NodeJS',
@@ -16,7 +17,17 @@ var ws_clients = {
   '/ws/instagram': [],
 };
 var websocket = require('nodejs-websocket');
-var ws_server = websocket.createServer(function (conn) {
+
+var ws_options = {};
+if (process.env.USE_HTTPS) {
+  ws_options = {
+    secure: true,
+    key: fs.readFileSync(process.env.HTTPS_KEY),
+    cert: fs.readFileSync(process.env.HTTPS_CERT),
+  };
+}
+
+var ws_server = websocket.createServer(ws_options, function (conn) {
   console.log('websocket: New connection via ' + conn.path);
   if (!ws_clients.hasOwnProperty(conn.path)) {
     conn.sendText('ERROR: Unhandled path ' + conn.path);

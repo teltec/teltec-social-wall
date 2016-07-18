@@ -15,12 +15,14 @@ $(document).ready(function () {
     'networks': {
       'twitter': {
         'websocket': {
-          'url': 'ws://' + window.location.hostname + ':8001/ws/twitter',
+          'url': (window.location.protocol == "https:" ? 'wss://' : 'ws://')
+            + window.location.hostname + ':8001/ws/twitter',
         }
       },
       'instagram': {
         'websocket': {
-          'url': 'ws://' + window.location.hostname + ':8001/ws/instagram',
+          'url': (window.location.protocol == "https:" ? 'wss://' : 'ws://')
+            + window.location.hostname + ':8001/ws/instagram',
         }
       },
     }

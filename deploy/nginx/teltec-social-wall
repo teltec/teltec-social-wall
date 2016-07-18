@@ -1,10 +1,19 @@
 server {
-    listen 80;
+    listen 443;
     server_name example.com;
+
+    ssl on;
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
 
     location / {
         proxy_set_header   X-Forwarded-For $remote_addr;
         proxy_set_header   Host $http_host;
         proxy_pass         "http://127.0.0.1:3000";
+    }
+    
+    location /public {
+        root /home/node/teltec-social-wall/public;
+        index index.html;
     }
 }
