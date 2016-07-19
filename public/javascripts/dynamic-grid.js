@@ -5,13 +5,13 @@ var Shuffle = window.shuffle;
 var DynamicGrid = function (element) {
   this.element = element;
 
-  // Log events.
-  this.register_event_listeners();
-
   this.shuffle = new Shuffle(element, {
     itemSelector: '.social-item',
     //sizer: this._get_social_item_size,
   });
+
+  // Log events.
+  this.register_event_listeners();
 };
 
 DynamicGrid.prototype.sort_by = function (value_fn, is_reverse) {
