@@ -19,7 +19,7 @@ var ws_clients = {
 var websocket = require('nodejs-websocket');
 
 var ws_options = {};
-if (process.env.USE_HTTPS) {
+if (process.env.USE_HTTPS === 'true') {
   ws_options = {
     secure: true,
     key: fs.readFileSync(process.env.HTTPS_KEY),

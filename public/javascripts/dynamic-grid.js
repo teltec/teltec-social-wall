@@ -1,6 +1,6 @@
 'use strict';
 
-var Shuffle = window.shuffle;
+var Shuffle = window.Shuffle;
 
 var DynamicGrid = function (element) {
   this.element = element;

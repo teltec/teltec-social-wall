@@ -1,7 +1,7 @@
 #!/bin/bash
 PORT=3000 \
 	DOMAIN="socialapp.teltecsolutions.com.br" \
-	USE_HTTPS="true" \
+	USE_HTTPS="false" \
 	HTTPS_KEY="/etc/letsencrypt/live/socialapp.teltecsolutions.com.br/privkey.pem" \
 	HTTPS_CERT="/etc/letsencrypt/live/socialapp.teltecsolutions.com.br/fullchain.pem" \
 	INSTAGRAM_CLIENT_ID="CHANGE_ME" \
